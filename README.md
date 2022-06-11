@@ -30,11 +30,11 @@ M5Unified / LovyanGFX で使用する場合は、下記を参照ください<BR>
 #include <stdint.h>
 #define U8G2_FONT_SECTION(name) 
 #include "u8g2_font_FreeSans.h"
-static const lgfx::U8g2font u8g2font1(u8g2_font_FreeSansBoldOblique92pt7b);
+static const lgfx::U8g2font u8g2font92(u8g2_font_FreeSansBoldOblique92pt7b);
 ```
-setFont(&u8g2font1); のように指定します
+setFont(&u8g2font92); のように指定します
 
-数値を右寄せした時にレイアウトずれが起きるので、RightAlignAdj() で右寄せの調整を行っています<BR>
+~~数値を右寄せした時にレイアウトずれが起きるので、RightAlignAdj() で右寄せの調整を行っています~~<BR>
 利用方法はコード内を参照ください<BR>
 
 ## 関連リンク

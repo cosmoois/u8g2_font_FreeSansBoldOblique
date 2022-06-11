@@ -6,16 +6,12 @@
 static M5GFX &display = M5.Display;
 LGFX_Sprite canvas(&display);
 
-static const lgfx::U8g2font u8g2font1(u8g2_font_FreeSansBoldOblique92pt7b);
-static const lgfx::U8g2font u8g2font2(u8g2_font_FreeSansBoldOblique40pt7b);
-static const lgfx::U8g2font u8g2font3(u8g2_font_FreeSansBoldOblique42pt7b);
-static const lgfx::U8g2font u8g2font4(u8g2_font_FreeSansBoldOblique32pt7b);
-static const lgfx::U8g2font u8g2font5(u8g2_font_FreeSansBoldOblique18pt7ba);
+static const lgfx::U8g2font u8g2font92(u8g2_font_FreeSansBoldOblique92pt7b);
+static const lgfx::U8g2font u8g2font40(u8g2_font_FreeSansBoldOblique40pt7b);
+static const lgfx::U8g2font u8g2font42(u8g2_font_FreeSansBoldOblique42pt7b);
+static const lgfx::U8g2font u8g2font32(u8g2_font_FreeSansBoldOblique32pt7b);
+static const lgfx::U8g2font u8g2font18a(u8g2_font_FreeSansBoldOblique18pt7ba);
 
-static std::int32_t lcd_width;
-static std::int32_t lcd_height;
-
-void RightAlignAdj(LGFX_Sprite* disp, int val, int* x);
 void DrawParameter(int idx, LGFX_Sprite* disp, int line, float val, int format);
 
 void setup()
@@ -28,8 +24,8 @@ void setup()
   }
   display.setColorDepth(16);
 
-  lcd_width = display.width();
-  lcd_height = display.height();
+  int lcd_width = display.width();
+  int lcd_height = display.height();
   canvas.setColorDepth(16);
   canvas.createSprite(lcd_width, lcd_height);
 }
@@ -37,7 +33,7 @@ void setup()
 void loop()
 {
   static float cnt = 0;
-  static int idx = 6;
+  static int idx = 1;
 
   canvas.clear();
   switch (idx)
@@ -47,177 +43,98 @@ void loop()
     DrawParameter(idx, &canvas, 0, cnt, 1);
     break;
   case 4:
-    DrawParameter(idx, &canvas, 0, cnt, 1);
-    DrawParameter(idx, &canvas, 1, cnt, 1);
-    DrawParameter(idx, &canvas, 2, cnt, 1);
-    DrawParameter(idx, &canvas, 3, cnt, 1);
+    DrawParameter(idx, &canvas, 0, cnt,      2);
+    DrawParameter(idx, &canvas, 1, cnt,      1);
+    DrawParameter(idx, &canvas, 2, cnt * 10, 0);
+    DrawParameter(idx, &canvas, 3, cnt,      0);
     break;
   case 1:
   case 5:
   case 6:
     DrawParameter(idx, &canvas, 0, cnt, 1);
-    DrawParameter(idx, &canvas, 1, cnt, 1);
+    DrawParameter(idx, &canvas, 1, cnt, 0);
     break;
   }
   canvas.pushSprite(0, 0);
 
   cnt += 0.1;
-  if (cnt >= 30)
+  if (cnt >= 25)
   {
     cnt = 0;
-    idx--;
-    if (idx == 0)	idx = 6;
+    idx++;
+    if (idx > 6)	idx = 1;
   }
 
-  delay(10);
+  // unsigned long timecnt;
+  // do {
+  //   timecnt = millis();
+  // } while (timecnt % 1000 != 0);
 }
 
 void DrawParameter(int idx, LGFX_Sprite* disp, int line, float val, int format)
 {
+  String Str_set;
   char str[32];
-  int rx;
-  int adjval;
+  int num_size;   // 数字フォント基準幅（フォント毎に固定：調整不可）
+  int dot_size;   // 小数点フォント幅（フォント毎に固定：調整不可）
+  int x_adj;      // x軸右寄せ調整値（フォント毎に固定：調整不可）
 
-  dtostrf((int)(val * pow(10, format)) / (float)pow(10, format), 7, format, str);
-  adjval = ((int)(val * pow(10, format)) % 10);
+  int rx;         // 右寄せ位置（サンプルとしてディスプレイの右端を指定）
+  int line_space; // 行間隔（サンプルとしてディスプレイを１，２，４等分する値を指定）
+  int y_offset;   // Y軸オフセット（サンプルとして行の中央になるように指定）
+
+  if (format == 0) {
+    Str_set = String((int)val);
+  } else {
+    Str_set = String(val, format);
+  }
+  Str_set.toCharArray(str, sizeof(str));
 
   disp->setTextColor(TFT_WHITE);
   disp->setTextDatum(textdatum_t::top_left);
 
   if ((idx == 1) || (idx == 4)) {
-    disp->drawRect(0, 0, 240, 240, TFT_WHITE);
+    disp->drawRect(0, 0, 240, 240, TFT_YELLOW);
+    rx = 240;
     if (idx == 1) {
-      disp->setFont(&u8g2font1);
-      rx = 240 - 4 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 120) + 17);
+      disp->setFont(&u8g2font92); num_size = 65;  dot_size = 32;  x_adj = 17;
+      line_space = 120;
+      y_offset = 16;
     }
     else {
-      disp->setFont(&u8g2font2);
-      rx = 240 - 4 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 60) + 2);
+      disp->setFont(&u8g2font40); num_size = 40;  dot_size = 20;  x_adj = 12;
+      line_space = 60;
+      y_offset = 4;
     }
   }
   else if ((idx == 2) || (idx == 5)) {
-    disp->drawRect(0, 0, 160, 80, TFT_WHITE);
+    disp->drawRect(0, 0, 160, 80, TFT_YELLOW);
+    rx = 160;
     if (idx == 2) {
-      disp->setFont(&u8g2font3);
-      rx = 160 - 7 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 40) + 12);
+      disp->setFont(&u8g2font42); num_size = 42;  dot_size = 21;  x_adj = 12;
+      line_space = 0; // １行のみ表示のためダミー値をセット
+      y_offset = 13;
     }
     else {
-      disp->setFont(&fonts::FreeSansBoldOblique24pt7b);
-      rx = 160 - 4 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 40) + 0);
+      disp->setFont(&fonts::FreeSansBoldOblique24pt7b); num_size = 26;  dot_size = 13;  x_adj = 7;
+      line_space = 40;
+      y_offset = 1;
     }
   }
   else if ((idx == 3) || (idx == 6)) {
-    disp->drawRect(0, 0, 128, 64, TFT_WHITE);
+    disp->drawRect(0, 0, 128, 64, TFT_YELLOW);
+    rx = 128;
     if (idx == 3) {
-      disp->setFont(&u8g2font4);
-      rx = 128 - 8 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 32) + 10);
+      disp->setFont(&u8g2font32); num_size = 32;  dot_size = 16;  x_adj = 9;
+      line_space = 0; // １行のみ表示のためダミー値をセット
+      y_offset = 11;
     }
     else {
-      disp->setFont(&fonts::FreeSansBoldOblique18pt7b);
-      rx = 128 - 4 - disp->textWidth(str);
-      RightAlignAdj(disp, adjval, &rx);
-      disp->drawString(str, rx, (line * 32) + 2);
+      disp->setFont(&fonts::FreeSansBoldOblique18pt7b); num_size = 19;  dot_size = 9;   x_adj = 4;
+      line_space = 32;
+      y_offset = 2;
     }
   }
-}
 
-// FreeSansBoldOblique前提の右揃え調整
-void RightAlignAdj(LGFX_Sprite* disp, int val, int* x)
-{
-  int diff = 0;
-  int height = disp->fontHeight();
-
-  switch (height)
-  {
-  case 89:	// u8g2_font_FreeSansBoldOblique92pt7b
-    if (val == 0) diff = -5;
-    if (val == 1) diff = -12;
-    if (val == 2) diff = -3;
-    if (val == 3) diff = -5;
-    if (val == 4) diff = -7;
-    if (val == 5) diff = -2;
-    if (val == 6) diff = -4;
-    if (val == 7) diff = +3;
-    if (val == 8) diff = -4;
-    if (val == 9) diff = -5;
-    break;
-  case 56:	// u8g2_font_FreeSansBoldOblique42pt7b
-    if (val == 0) diff = +0;
-    if (val == 1) diff = -4;
-    if (val == 2) diff = +1;
-    if (val == 3) diff = +0;
-    if (val == 4) diff = -1;
-    if (val == 5) diff = +2;
-    if (val == 6) diff = +1;
-    if (val == 7) diff = +5;
-    if (val == 8) diff = +0;
-    if (val == 9) diff = +0;
-    break;
-  case 54:	// u8g2_font_FreeSansBoldOblique40pt7b
-    if (val == 0) diff = +0;
-    if (val == 1) diff = -4;
-    if (val == 2) diff = +1;
-    if (val == 3) diff = +0;
-    if (val == 4) diff = -2;
-    if (val == 5) diff = +1;
-    if (val == 6) diff = +0;
-    if (val == 7) diff = +4;
-    if (val == 8) diff = +0;
-    if (val == 9) diff = -1;
-    break;
-  case 48:	// u8g2_font_FreeSansBoldOblique36pt7b
-    if (val == 0) diff = +0;
-    if (val == 1) diff = -3;
-    if (val == 2) diff = +1;
-    if (val == 3) diff = +0;
-    if (val == 4) diff = -1;
-    if (val == 5) diff = +2;
-    if (val == 6) diff = +1;
-    if (val == 7) diff = +4;
-    if (val == 8) diff = +1;
-    if (val == 9) diff = +0;
-    break;
-  case 42:	// u8g2_font_FreeSansBoldOblique32pt7b
-    if (val == 0) diff = +0;
-    if (val == 1) diff = -3;
-    if (val == 2) diff = +1;
-    if (val == 3) diff = +0;
-    if (val == 4) diff = -1;
-    if (val == 5) diff = +1;
-    if (val == 6) diff = +1;
-    if (val == 7) diff = +4;
-    if (val == 8) diff = +0;
-    if (val == 9) diff = +0;
-    break;
-  case 46:	// FreeSansBoldOblique24pt7b
-    if (val == 1) diff = -3;
-    if (val == 2) diff = +1;
-    if (val == 4) diff = -1;
-    if (val == 5) diff = +1;
-    if (val == 7) diff = +3;
-    break;
-  case 35:	// FreeSansBoldOblique18pt7b
-    if (val == 1) diff = -2;
-    if (val == 2) diff = +1;
-    if (val == 3) diff = +1;
-    if (val == 5) diff = +1;
-    if (val == 6) diff = +1;
-    if (val == 7) diff = +3;
-    if (val == 8) diff = +1;
-    break;
-  default:
-    break;
-  }
-
-  *x += diff;
+  disp->drawString(str, rx - (strlen(str) * num_size) - (format ? 0 : dot_size) + x_adj, (line * line_space) + y_offset);
 }
