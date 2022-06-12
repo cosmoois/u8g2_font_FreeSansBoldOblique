@@ -16,10 +16,15 @@ FreeSansの太斜字フォント(FreeSansBoldOblique)をU8g2形式でASCIIコー
 
 オマケで温度表示に使用する「℃」のみが含まれる18ptのフォントも入れてあります<BR>
 
+![](sample1.jpg)
+![](sample2.jpg)
+![](sample3.jpg)
+
 ## 動作確認環境
 
 このソースコードは、PlatformIO で確認しています<BR>
 ハードウェアは、M5Unifiedで動作する環境（動作確認したのはM5StickCのみ）<BR>
+240x240ディスプレイのデモは別ソースコードでのデモです（M5Stackを所有していないので初期化だけ置き換えて表示しています）
 
 ## 使用方法
 
