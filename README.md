@@ -2,7 +2,7 @@
 
 ## 概要
 
-時刻やセンサー値の表示を小型ディスプレイにフィットするフォントを用意しました<BR>
+M5Unified / LovyanGFX で使用できる、時刻やセンサー値の表示を小型ディスプレイにフィットするフォントを用意しました<BR>
 FreeSansの太斜字フォント(FreeSansBoldOblique)をU8g2形式でASCIIコード0x20（空白）,0x2E-0x3A（./0123456789:）だけを登録しています<BR>
 | ポイント | 適用 | イメージ | ラベル名 |
 |---------|------|--------:|---------|
@@ -23,24 +23,22 @@ FreeSansの太斜字フォント(FreeSansBoldOblique)をU8g2形式でASCIIコー
 ## 動作確認環境
 
 このソースコードは、PlatformIO で確認しています<BR>
-ハードウェアは、M5Unifiedで動作する環境（動作確認したのはM5StickCのみ）<BR>
-240x240ディスプレイのデモは別ソースコードでのデモです（M5Stackを所有していないので初期化だけ置き換えて表示しています）
+ハードウェアは、M5Unifiedで動作する環境（動作確認したのはM5StickCのみ）または、<BR>
+DOIT ESP32 DEVKIT + 1.3inch ST7789 240x240ディスプレイです<BR>
 
 ## 使用方法
 
-M5Unified / LovyanGFX で使用する場合は、下記を参照ください<BR>
-
-宣言
+宣言：
 ```
 #include <stdint.h>
 #define U8G2_FONT_SECTION(name) 
 #include "u8g2_font_FreeSans.h"
 static const lgfx::U8g2font u8g2font92(u8g2_font_FreeSansBoldOblique92pt7b);
 ```
-setFont(&u8g2font92); のように指定します
+指定：<BR>
+setFont(&u8g2font92); のように指定します<BR>
 
-~~数値を右寄せした時にレイアウトずれが起きるので、RightAlignAdj() で右寄せの調整を行っています~~<BR>
-利用方法はコード内を参照ください<BR>
+右寄せレイアウトの参考として、フォントごとにDrawParameter_XXpt_Yline()の関数を用意しているので参考にしてください<BR>
 
 ## 関連リンク
 
